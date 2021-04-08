@@ -1,15 +1,19 @@
-import { makeAutoObservable } from 'mobx'
+import { makeAutoObservable } from 'mobx';
 
 class ToolState {
-  tool = null
+  tool = null;
 
   constructor() {
-    makeAutoObservable(this)
+    makeAutoObservable(this);
   }
 
   setTool(tool) {
-    this.tool = tool
+    this.tool = tool;
+  }
+
+  setStrokeColor(color) {
+    this.tool.strokeColor = color;
   }
 }
 
-export default new ToolState()
+export default new ToolState();
