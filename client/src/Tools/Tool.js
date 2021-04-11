@@ -1,8 +1,11 @@
 export default class Tool {
-  constructor(canvas) {
+  constructor(canvas, toolState) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.destroyEvents();
+    console.log(toolState);
+    this.strokeColor = toolState?.color || '#000000';
+    this.strokeWidth = 10;
   }
 
   destroyEvents() {

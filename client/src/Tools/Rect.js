@@ -1,8 +1,8 @@
 import Tool from './Tool';
 
 export default class Rect extends Tool {
-  constructor(canvas) {
-    super(canvas);
+  constructor(canvas, toolState) {
+    super(canvas, toolState);
     this.listen();
   }
 

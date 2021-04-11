@@ -1,12 +1,14 @@
 import * as R from 'ramda';
-
+import { observer } from 'mobx-react-lite';
 import * as UI from './ui';
 import toolState from '@Store/toolState';
 import canvasState from '@Store/canvasState';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Line from '../../Tools/Line';
 import Brush from '../../Tools/Brush';
 import Rect from '../../Tools/Rect';
+import Eraser from '../../Tools/Eraser';
+import { getUniqId } from '../../helpers/utils';
 
 const tools = {
   drawTools: [
@@ -32,18 +34,19 @@ const tools = {
     },
     {
       name: 'Eraser',
-      instance: Brush,
+      instance: Eraser,
       icon: 'icons/eraser.svg',
     },
+  ],
+  options: [
     {
       name: 'Color Picker',
       // icon: 'icons/color-picker.svg',
-      input: {
-        changeHandler: ({ target }) => {
-          toolState.setStrokeColor(target.value);
-        },
-        type: 'file',
+      changeHandler: ({ target }) => {
+        toolState.setStrokeColor(target.value);
+        console.log(toolState.tool.strokeColor);
       },
+      type: 'color',
     },
   ],
   actionTools: [
@@ -70,34 +73,28 @@ const tools = {
   ],
 };
 
-const ColorPicker = ({ name, setColorHandler, icon, active }) => {
+const InputTool = observer((props) => {
+  const id = getUniqId();
+
+  useEffect(() => {
+    console.log(toolState);
+  });
+
   return (
-    <UI.LabelIcon htmlFor="file">
-      {icon && <UI.ToolIcon active={active} title={name} src={icon} />}
-      <UI.Input hidden={!!icon} alt={name} onChange={setColorHandler} type="color" id="file" />
+    <UI.LabelIcon alt={props.name} htmlFor="id">
+      <UI.Input hidden={!!props.icon} onChange={props.changeHandler} type={props.type} id="id" />
     </UI.LabelIcon>
   );
-};
+});
 
 const ToolPicker = ({ name, input, instance, icon, isActive, setActive }) => {
   const changeToolHandler = useCallback(
     () => (e) => {
-      toolState.setTool(new instance(canvasState.canvas));
+      toolState.setTool(new instance(canvasState.canvas, toolState));
       setActive(name);
     },
     [canvasState.canvas, instance, name, isActive],
   );
-
-  if (input && R.equals(input.type, 'file')) {
-    return (
-      <ColorPicker
-        active={isActive}
-        name={name}
-        icon={icon}
-        setColorHandler={input.changeHandler}
-      />
-    );
-  }
 
   return <UI.ToolIcon active={isActive} title={name} onClick={changeToolHandler()} src={icon} />;
 };
@@ -118,6 +115,15 @@ const Toolbar = (props) => {
             />
           ),
           tools.drawTools,
+        )}
+      </UI.ToolbarContainer>
+
+      <UI.ToolbarContainer>
+        {R.map(
+          (tool) => (
+            <InputTool {...tool} key={tool.name} />
+          ),
+          tools.options,
         )}
       </UI.ToolbarContainer>
     </UI.ToolbarWrapper>
